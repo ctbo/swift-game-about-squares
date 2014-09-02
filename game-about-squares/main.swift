@@ -65,6 +65,43 @@ struct State
     var count : Int {
         return squares.count
     }
+    
+    func click (pos : Position, puzzle : Puzzle) -> State
+    {
+        if let square = squares[pos]
+        {
+            return self.move(pos, square.direction, puzzle)
+        }
+        else
+        {
+            return self
+        }
+    }
+    
+    func move (pos : Position, _ dir : Direction, _ puzzle : Puzzle) -> State
+    {
+        if var square = squares[pos]
+        {
+            var newState = self
+            let newPos = pos.move(dir)
+            if let pushedSquare = squares[newPos]
+            {
+                newState = self.move(newPos, dir, puzzle)
+            }
+            if let newDirection = puzzle.arrows[newPos]
+            {
+                square.direction = newDirection
+            }
+            var newSquares = newState.squares
+            newSquares[pos] = nil
+            newSquares[newPos] = square
+            return State(squares: newSquares)
+        }
+        else
+        {
+            return self
+        }
+    }
 }
 
 struct Puzzle
