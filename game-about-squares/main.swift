@@ -37,29 +37,63 @@ func == (left: Position, right: Position) -> Bool {
 
 typealias Rectangle = (Position, Position)
 
-enum Color
+enum Color : Printable
 {
     case Red, Green, Blue, Black, Yellow, Orange
+    var description : String {
+        switch self
+        {
+        case Red: return "Red"
+        case Green: return "Green"
+        case Blue: return "Blue"
+        case Black: return "Black"
+        case Yellow: return "Yellow"
+        case Orange: return "Orange"
+        }
+    }
 }
 
-enum Direction
+enum Direction : Printable
 {
     case Up, Down, Left, Right
+    var description : String {
+        switch self {
+        case Up: return "Up"
+        case Down: return "Down"
+        case Left: return "Left"
+        case Right: return "Right"
+            }
+    }
 }
 
-struct Square
+struct Square : Printable
 {
     let color : Color
     var direction : Direction
+
+    var description : String
+    {
+        return "Square(\(color), \(direction))"
+    }
 }
 
-struct State
+struct State : Printable
 {
     let squares : [Position : Square]
     
     init(squares: [Position : Square])
     {
         self.squares = squares
+    }
+    
+    var description: String {
+        var out = "["
+        for (p, s) in squares
+        {
+            out += "\(p):\(s), "
+        }
+        out += "]"
+        return out
     }
 
     var count : Int {
@@ -162,4 +196,4 @@ let level19 = Puzzle(
 
 println("Hello, World!")
 println(level19.boundingBox)
-
+println(level19.initial)
