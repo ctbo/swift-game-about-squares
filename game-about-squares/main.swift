@@ -53,7 +53,19 @@ struct Square
     var direction : Direction
 }
 
-typealias State = [Position : Square]
+struct State
+{
+    let squares : [Position : Square]
+    
+    init(squares: [Position : Square])
+    {
+        self.squares = squares
+    }
+
+    var count : Int {
+        return squares.count
+    }
+}
 
 struct Puzzle
 {
@@ -105,11 +117,11 @@ let level19 = Puzzle(
         Position(r: 3, c: 3): .Blue,
         Position(r: 5, c: 3): .Black
     ],
-    initial: [
+    initial: State (squares: [
         Position(r: 4, c: 1): Square(color: .Red, direction: .Down),
         Position(r: 5, c: 2): Square(color: .Blue, direction: .Down),
         Position(r: 6, c: 3): Square(color: .Black, direction: .Up)
-    ])
+    ]))
 
 println("Hello, World!")
 println(level19.boundingBox)
