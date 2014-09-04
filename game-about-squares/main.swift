@@ -13,7 +13,7 @@ struct Position : Hashable, Printable
     var r, c: Int
     
     var hashValue: Int {
-        return r &* 65536 &+ c
+        return r &* 32 &+ c
     }
     var description: String {
         return "(\(r, c))"
@@ -75,13 +75,14 @@ struct Square : Printable
     {
         return "Square(\(color), \(direction))"
     }
+    
 }
 
 struct State : Printable
 {
-    let squares : [Position : Square]
+    var squares : [(Position, Square)]
     
-    init(squares: [Position : Square])
+    init(squares: [(Position, Square)])
     {
         self.squares = squares
     }
@@ -100,40 +101,26 @@ struct State : Printable
         return squares.count
     }
     
-    func click (pos : Position, puzzle : Puzzle) -> State
+    func click (squareno : Int, puzzle : Puzzle) -> State
     {
-        if let square = squares[pos]
-        {
-            return self.move(pos, square.direction, puzzle)
-        }
-        else
-        {
-            return self
-        }
+        var newState = self
+        push(&newState, squares[squareno].0, squares[squareno].1.direction, puzzle)
+        return newState
     }
-    
-    func move (pos : Position, _ dir : Direction, _ puzzle : Puzzle) -> State
-    {
-        if var square = squares[pos]
-        {
-            var newState = self
+}
+
+
+func push(inout state: State, pos: Position, dir: Direction, puzzle: Puzzle)
+{
+    for i in 0 ..< state.count {
+        if state.squares[i].0 == pos {
             let newPos = pos.move(dir)
-            if let pushedSquare = squares[newPos]
-            {
-                newState = self.move(newPos, dir, puzzle)
+            push(&state, newPos, dir, puzzle)
+            state.squares[i].0 = newPos
+            if let newDir = puzzle.arrows[newPos] {
+                state.squares[i].1.direction = newDir
             }
-            if let newDirection = puzzle.arrows[newPos]
-            {
-                square.direction = newDirection
-            }
-            var newSquares = newState.squares
-            newSquares[pos] = nil
-            newSquares[newPos] = square
-            return State(squares: newSquares)
-        }
-        else
-        {
-            return self
+            break
         }
     }
 }
@@ -189,11 +176,12 @@ let level19 = Puzzle(
         Position(r: 5, c: 3): .Black
     ],
     initial: State (squares: [
-        Position(r: 4, c: 1): Square(color: .Red, direction: .Down),
-        Position(r: 5, c: 2): Square(color: .Blue, direction: .Down),
-        Position(r: 6, c: 3): Square(color: .Black, direction: .Up)
+        (Position(r: 4, c: 1), Square(color: .Red, direction: .Down)),
+        (Position(r: 5, c: 2), Square(color: .Blue, direction: .Down)),
+        (Position(r: 6, c: 3), Square(color: .Black, direction: .Up))
     ]))
 
 println("Hello, World!")
 println(level19.boundingBox)
 println(level19.initial)
+println(level19.initial.click(0, puzzle: level19))
