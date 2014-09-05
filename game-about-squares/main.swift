@@ -260,6 +260,28 @@ func solve (puzzle: Puzzle) -> [Color]
     return []
 }
 
+func group<T: Equatable> (var list: [T]) -> [(Int, T)]
+{
+    var out: [(Int, T)] = []
+    if list.isEmpty {
+        return out
+    }
+    var prev = list.removeAtIndex(0)
+    var count = 1
+    for x in list {
+        if x != prev {
+            let pair = (count, prev)
+            out.append(pair)
+            prev = x
+            count = 0
+        }
+        ++count
+    }
+    let pair = (count, prev)
+    out.append(pair)
+    return out
+}
+
 let level0 = Puzzle(
     arrows: [:],
     targets: [Position(r: 3, c: 1): .Red],
@@ -300,5 +322,13 @@ let level19 = Puzzle(
         (Position(r: 6, c: 3), Square(color: .Black, direction: .Up))
     ]))
 
-println("Hello, World!")
-println(solve(level19))
+println("Solving Game About Squares")
+
+let startTime = NSDate()
+let solution = solve(level19)
+let endTime = NSDate()
+
+println(group(solution))
+println("\(solution.count) moves.")
+let time = endTime.timeIntervalSinceDate(startTime)
+println("Time: \(time) s")
