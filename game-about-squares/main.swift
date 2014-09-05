@@ -129,6 +129,15 @@ struct State : Hashable, Printable
         push(&newState, squares[squareno].0, squares[squareno].1.direction, puzzle)
         return newState
     }
+    
+    func squareAt(pos: Position) -> Square? {
+        for (p, s) in squares {
+            if p == pos {
+                return s
+            }
+        }
+        return nil
+    }
 }
 
 func == (s1: State, s2: State) -> Bool {
@@ -194,6 +203,57 @@ struct Puzzle
         box.1.c += initial.count
         self.boundingBox = box
     }
+    
+    func isSolvedBy(state: State) -> Bool {
+        for (p, c) in targets {
+            if let s = state.squareAt(p) {
+                if s.color != c {
+                    return false
+                }
+            }
+            else {
+                return false
+            }
+        }
+        return true
+    }
+    
+    func inBoundingBox(state: State) -> Bool {
+        for s in state.squares {
+            if s.0.r < boundingBox.0.r || s.0.c < boundingBox.0.c || s.0.r > boundingBox.1.r || s.0.c > boundingBox.1.c {
+                return false
+            }
+        }
+        return true
+    }
+}
+
+func solve (puzzle: Puzzle) -> [Color]
+{
+    var visited: [State:Void] = [:]
+    var todo: [(State, [Color])] = [(puzzle.initial, [])]
+
+    while (!todo.isEmpty)
+    {
+        let (state, moves) = todo.removeAtIndex(0)
+        for i in 0 ..< state.count {
+            let newState = state.click(i, puzzle: puzzle)
+            var newMoves = moves
+            newMoves.append(state.squares[i].1.color)
+            if puzzle.isSolvedBy(newState) {
+                return newMoves
+            }
+            if visited[newState] == nil {
+                visited[newState] = ()
+                if puzzle.inBoundingBox(newState) {
+                    let newPair = (newState, newMoves)
+                    todo.append(newPair) // todo.append((newState, newMoves)) // didn't work
+                }
+            }
+        }
+    }
+    
+    return []
 }
 
 let level19 = Puzzle(
@@ -218,6 +278,4 @@ let level19 = Puzzle(
     ]))
 
 println("Hello, World!")
-println(level19.boundingBox)
-println(level19.initial)
-println(level19.initial.click(0, puzzle: level19))
+println(solve(level19))
