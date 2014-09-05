@@ -66,11 +66,14 @@ enum Direction : Printable
     }
 }
 
-struct Square : Printable
+struct Square : Hashable, Printable
 {
     let color : Color
     var direction : Direction
 
+    var hashValue: Int {
+        return color.hashValue &+ direction.hashValue &* 8
+    }
     var description : String
     {
         return "Square(\(color), \(direction))"
@@ -78,13 +81,32 @@ struct Square : Printable
     
 }
 
-struct State : Printable
+func == (s1: Square, s2: Square) -> Bool {
+    return s1.color == s2.color && s1.direction == s2.direction
+}
+
+/*
+func != (s1: Square, s2: Square) -> Bool {
+    return !(s1 == s2)
+}
+*/
+
+struct State : Hashable, Printable
 {
     var squares : [(Position, Square)]
     
     init(squares: [(Position, Square)])
     {
         self.squares = squares
+    }
+    
+    var hashValue : Int {
+        var result = 0
+            
+            for (p, s) in squares {
+                result = result &* 0x50000 &+ p.hashValue &+ s.hashValue &* 0x400
+            }
+            return result
     }
     
     var description: String {
@@ -101,12 +123,26 @@ struct State : Printable
         return squares.count
     }
     
-    func click (squareno : Int, puzzle : Puzzle) -> State
+    func click (squareno: Int, puzzle: Puzzle) -> State
     {
         var newState = self
         push(&newState, squares[squareno].0, squares[squareno].1.direction, puzzle)
         return newState
     }
+}
+
+func == (s1: State, s2: State) -> Bool {
+    if s1.count != s2.count {
+        return false
+    }
+    for i in 0 ..< s1.count {
+        let (pos1, square1) = s1.squares[i]
+        let (pos2, square2) = s2.squares[i]
+        if pos1 != pos2 || square1 != square2 {
+            return false
+        }
+    }
+    return true
 }
 
 
