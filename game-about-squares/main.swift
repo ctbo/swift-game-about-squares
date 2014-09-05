@@ -232,12 +232,16 @@ func solve (puzzle: Puzzle) -> [Color]
 {
     var visited: [State:Void] = [:]
     var todo: [(State, [Color])] = [(puzzle.initial, [])]
-
+    var n = 0
+    
     while (!todo.isEmpty)
     {
         let (state, moves) = todo.removeAtIndex(0)
         for i in 0 ..< state.count {
             let newState = state.click(i, puzzle: puzzle)
+            if ++n <= 20 {
+                println("\(newState) \(visited.count)")
+            }
             var newMoves = moves
             newMoves.append(state.squares[i].1.color)
             if puzzle.isSolvedBy(newState) {
@@ -255,6 +259,25 @@ func solve (puzzle: Puzzle) -> [Color]
     
     return []
 }
+
+let level0 = Puzzle(
+    arrows: [:],
+    targets: [Position(r: 3, c: 1): .Red],
+    initial: State (squares: [(Position(r: 1, c: 1), Square(color: .Red, direction: .Down))])
+)
+
+let level2 = Puzzle(
+    arrows: [:],
+    targets: [
+        Position(r: 1, c: 2): .Blue,
+        Position(r: 1, c: 3): .Red,
+        Position(r: 2, c: 2): .Black
+    ],
+    initial: State(squares: [
+        (Position(r: 1, c: 1), Square(color: .Red, direction: .Right)),
+        (Position(r: 2, c: 4), Square(color: .Black, direction: .Left)),
+        (Position(r: 3, c: 2), Square(color: .Blue, direction: .Up))
+        ]))
 
 let level19 = Puzzle(
     arrows: [
@@ -278,4 +301,4 @@ let level19 = Puzzle(
     ]))
 
 println("Hello, World!")
-println(solve(level19))
+println(solve(level2))
