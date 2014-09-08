@@ -230,7 +230,7 @@ struct Puzzle
 
 func solve (puzzle: Puzzle) -> [Color]
 {
-    var visited: [State:Void] = [:]
+    var visited = Dictionary<State, Void>(minimumCapacity:100000)
     var todo: [(State, [Color])] = [(puzzle.initial, [])]
     var n = 0
     
