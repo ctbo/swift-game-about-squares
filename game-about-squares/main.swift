@@ -91,13 +91,18 @@ func != (s1: Square, s2: Square) -> Bool {
 }
 */
 
-struct State : Hashable, Printable
+class State : Hashable, Printable
 {
     var squares : [(Position, Square)]
     
     init(squares: [(Position, Square)])
     {
         self.squares = squares
+    }
+    
+    init(state: State)
+    {
+        self.squares = state.squares
     }
     
     var hashValue : Int {
@@ -123,13 +128,26 @@ struct State : Hashable, Printable
         return squares.count
     }
     
-    func click (squareno: Int, puzzle: Puzzle) -> State
+    func click (squareno: Int, puzzle: Puzzle)
     {
-        var newState = self
-        push(&newState, squares[squareno].0, squares[squareno].1.direction, puzzle)
-        return newState
+        push(squares[squareno].0, dir: squares[squareno].1.direction, puzzle: puzzle)
     }
     
+    func push(pos: Position, dir: Direction, puzzle: Puzzle)
+    {
+        for i in 0 ..< squares.count {
+            if squares[i].0 == pos {
+                let newPos = pos.move(dir)
+                push(newPos, dir: dir, puzzle: puzzle)
+                squares[i].0 = newPos
+                if let newDir = puzzle.arrows[newPos] {
+                    squares[i].1.direction = newDir
+                }
+                break
+            }
+        }
+    }
+
     func squareAt(pos: Position) -> Square? {
         for (p, s) in squares {
             if p == pos {
@@ -155,20 +173,6 @@ func == (s1: State, s2: State) -> Bool {
 }
 
 
-func push(inout state: State, pos: Position, dir: Direction, puzzle: Puzzle)
-{
-    for i in 0 ..< state.count {
-        if state.squares[i].0 == pos {
-            let newPos = pos.move(dir)
-            push(&state, newPos, dir, puzzle)
-            state.squares[i].0 = newPos
-            if let newDir = puzzle.arrows[newPos] {
-                state.squares[i].1.direction = newDir
-            }
-            break
-        }
-    }
-}
 
 struct Puzzle
 {
@@ -238,7 +242,8 @@ func solve (puzzle: Puzzle) -> [Color]
     {
         let (state, moves) = todo[w]
         for i in 0 ..< state.count {
-            let newState = state.click(i, puzzle: puzzle)
+            let newState = State(state: state)
+            newState.click(i, puzzle: puzzle)
             var newMoves = moves
             newMoves.append(state.squares[i].1.color)
             if puzzle.isSolvedBy(newState) {
