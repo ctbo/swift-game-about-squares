@@ -94,6 +94,7 @@ func != (s1: Square, s2: Square) -> Bool {
 struct State : Hashable, Printable
 {
     var squares : [(Position, Square)]
+    static var nhashes = 0
     
     init(squares: [(Position, Square)])
     {
@@ -102,7 +103,7 @@ struct State : Hashable, Printable
     
     var hashValue : Int {
         var result = 0
-            
+            ++State.nhashes
             for (p, s) in squares {
                 result = result &* 0x50000 &+ p.hashValue &+ s.hashValue &* 0x400
             }
@@ -230,7 +231,7 @@ struct Puzzle
 
 func solve (puzzle: Puzzle) -> [Color]
 {
-    var visited = Dictionary<State, Void>(minimumCapacity:100000)
+    var visited = Dictionary<State, Void>(minimumCapacity:10_000_000)
     var todo: [(State, [Color])] = [(puzzle.initial, [])]
     var n = 0
     
@@ -332,3 +333,5 @@ println(group(solution))
 println("\(solution.count) moves.")
 let time = endTime.timeIntervalSinceDate(startTime)
 println("Time: \(time) s")
+println("Number of hashes: \(State.nhashes)")
+
