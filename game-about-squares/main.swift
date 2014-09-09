@@ -243,7 +243,7 @@ class Nothing
 
 func solve (puzzle: Puzzle) -> [Color]
 {
-    var visited = NSMutableDictionary(capacity: 100000)
+    var visited = NSMutableSet(capacity: 100000)
     var todo: [(State, [Color])] = [(puzzle.initial, [])]
     var n = 0
     
@@ -258,8 +258,8 @@ func solve (puzzle: Puzzle) -> [Color]
             if puzzle.isSolvedBy(newState) {
                 return newMoves
             }
-            if visited.objectForKey(newState) == nil {
-                visited.setObject(Nothing(), forKey: newState)
+            if !visited.containsObject(newState) {
+                visited.addObject(newState)
                 if puzzle.inBoundingBox(newState) {
                     let newPair = (newState, newMoves)
                     todo.append(newPair) // todo.append((newState, newMoves)) // didn't work
