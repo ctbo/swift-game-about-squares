@@ -243,7 +243,7 @@ class Nothing
 
 func solve (puzzle: Puzzle) -> [Color]
 {
-    var visited = NSMutableSet(capacity: 100000)
+    var visited = NSHashTable(options: NSPointerFunctionsObjectPersonality, capacity: 100000)
     var todo: [(State, [Color])] = [(puzzle.initial, [])]
     var n = 0
     
