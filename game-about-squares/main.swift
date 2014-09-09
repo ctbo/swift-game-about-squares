@@ -231,7 +231,9 @@ struct Puzzle
 func solve (puzzle: Puzzle) -> [Color]
 {
     var visited = Dictionary<State, Void>(minimumCapacity:100000)
-    var todo: [(State, [Color])] = [(puzzle.initial, [])]
+    var todo: [(State, [Color])] = Array(count:100000, repeatedValue:(State(squares: []), []))
+    var tail = 0
+    todo[tail++] = (puzzle.initial, [])
     var n = 0
     
     for (var w=0; w < todo.count; ++w)
@@ -248,7 +250,7 @@ func solve (puzzle: Puzzle) -> [Color]
                 visited[newState] = ()
                 if puzzle.inBoundingBox(newState) {
                     let newPair = (newState, newMoves)
-                    todo.append(newPair) // todo.append((newState, newMoves)) // didn't work
+                    todo[tail++] = newPair
                 }
             }
             if ++n <= 20 || n % 1024 == 0 {
