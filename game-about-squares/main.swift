@@ -91,7 +91,7 @@ func != (s1: Square, s2: Square) -> Bool {
 }
 */
 
-class State : Hashable, Printable, NSCopying
+@objc class State : Hashable, Printable
 {
     var squares : [(Position, Square)]
     
@@ -124,10 +124,14 @@ class State : Hashable, Printable, NSCopying
         return out
     }
 
-    func copyWithZone(zone: NSZone) -> AnyObject {
-        return State(state: self)
+    func isEqual(otherState: State?) -> Bool {
+        return self == otherState
     }
     
+    func hash() -> Int {
+        return hashValue
+    }
+
     var count : Int {
         return squares.count
     }
