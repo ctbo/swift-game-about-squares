@@ -91,7 +91,7 @@ func != (s1: Square, s2: Square) -> Bool {
 }
 */
 
-class State : Hashable, Printable
+class State : Hashable, Printable, NSCopying
 {
     var squares : [(Position, Square)]
     
@@ -124,6 +124,10 @@ class State : Hashable, Printable
         return out
     }
 
+    func copyWithZone(zone: NSZone) -> AnyObject {
+        return State(state: self)
+    }
+    
     var count : Int {
         return squares.count
     }
@@ -232,9 +236,14 @@ struct Puzzle
     }
 }
 
+class Nothing
+{
+}
+
+
 func solve (puzzle: Puzzle) -> [Color]
 {
-    var visited = Dictionary<State, Void>(minimumCapacity:100000)
+    var visited = NSMutableDictionary(capacity: 100000)
     var todo: [(State, [Color])] = [(puzzle.initial, [])]
     var n = 0
     
@@ -249,8 +258,8 @@ func solve (puzzle: Puzzle) -> [Color]
             if puzzle.isSolvedBy(newState) {
                 return newMoves
             }
-            if visited[newState] == nil {
-                visited[newState] = ()
+            if visited.objectForKey(newState) == nil {
+                visited.setObject(Nothing(), forKey: newState)
                 if puzzle.inBoundingBox(newState) {
                     let newPair = (newState, newMoves)
                     todo.append(newPair) // todo.append((newState, newMoves)) // didn't work
