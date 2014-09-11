@@ -8,6 +8,23 @@
 
 import Foundation
 
+class Set<T: Hashable>
+{
+    var dict: [T: Void] = [:]
+    
+    func insert(elt: T) {
+        dict[elt] = ()
+    }
+    
+    func contains(elt: T) -> Bool {
+        return dict[elt] != nil
+    }
+    
+    func count() -> Int {
+        return dict.count
+    }
+}
+
 struct Position : Hashable, Printable
 {
     var r, c: Int
@@ -231,7 +248,7 @@ struct Puzzle
 
 func solve (puzzle: Puzzle) -> [Color]
 {
-    var visited: [State: Void] = [:]
+    var visited = Set<State>()
     var todo: [(State, [Color])] = [(puzzle.initial, [])]
     var n = 0
     
@@ -245,8 +262,8 @@ func solve (puzzle: Puzzle) -> [Color]
             if puzzle.isSolvedBy(newState) {
                 return newMoves
             }
-            if visited[newState] == nil {
-                visited[newState] = ()
+            if !visited.contains(newState) {
+                visited.insert(newState)
                 if puzzle.inBoundingBox(newState) {
                     let newPair = (newState, newMoves)
                     todo.append(newPair) // todo.append((newState, newMoves)) // didn't work
