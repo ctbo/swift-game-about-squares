@@ -8,20 +8,19 @@
 
 import Foundation
 
-class Set<T: Hashable>
+struct Set<T: Hashable>
 {
     var dict: [T: Void] = [:]
+    var count: Int {
+        return dict.count
+    }
     
-    func insert(elt: T) {
+    mutating func insert(elt: T) {
         dict[elt] = ()
     }
     
     func contains(elt: T) -> Bool {
         return dict[elt] != nil
-    }
-    
-    func count() -> Int {
-        return dict.count
     }
 }
 
