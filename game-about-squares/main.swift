@@ -140,6 +140,15 @@ struct State : Hashable, Printable
         return squares.count
     }
     
+    subscript (i: Int) -> (Position, Square) {
+        get {
+            return squares[i]
+        }
+        set {
+            squares[i] = newValue
+        }
+    }
+    
     func click (squareno: Int, puzzle: Puzzle) -> State
     {
         var newState = self
@@ -162,8 +171,8 @@ func == (s1: State, s2: State) -> Bool {
         return false
     }
     for i in 0 ..< s1.count {
-        let (pos1, square1) = s1.squares[i]
-        let (pos2, square2) = s2.squares[i]
+        let (pos1, square1) = s1[i]
+        let (pos2, square2) = s2[i]
         if pos1 != pos2 || square1 != square2 {
             return false
         }
@@ -175,12 +184,12 @@ func == (s1: State, s2: State) -> Bool {
 func push(inout state: State, pos: Position, dir: Direction, puzzle: Puzzle)
 {
     for i in 0 ..< state.count {
-        if state.squares[i].0 == pos {
+        if state[i].0 == pos {
             let newPos = pos.move(dir)
             push(&state, newPos, dir, puzzle)
-            state.squares[i].0 = newPos
+            state[i].0 = newPos
             if let newDir = puzzle.arrows[newPos] {
-                state.squares[i].1.direction = newDir
+                state[i].1.direction = newDir
             }
             break
         }
@@ -257,7 +266,7 @@ func solve (puzzle: Puzzle) -> [Color]
         for i in 0 ..< state.count {
             let newState = state.click(i, puzzle: puzzle)
             var newMoves = moves
-            newMoves.append(state.squares[i].1.color)
+            newMoves.append(state[i].1.color)
             if puzzle.isSolvedBy(newState) {
                 return newMoves
             }
