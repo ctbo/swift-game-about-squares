@@ -277,7 +277,7 @@ func solve (puzzle: Puzzle) -> [Color]
                     todo.append(newPair) // todo.append((newState, newMoves)) // didn't work
                 }
             }
-            if ++n <= 20 || n % 1024 == 0 {
+            if ++n <= 20 || n % 0x1000 == 0 {
                 println("\(newState), \(newMoves.count) moves, \(visited.count) states")
             }
         }
@@ -348,10 +348,31 @@ let level19 = Puzzle(
         (Position(r: 6, c: 3), Square(color: .Black, direction: .Up))
     ]))
 
+let level26 = Puzzle(
+    arrows: [
+        Position(r: 1, c: 2): .Down,
+        Position(r: 2, c: 4): .Left,
+        Position(r: 3, c: 1): .Right,
+        Position(r: 4, c: 3): .Up
+    ],
+    targets: [
+        Position(r: 1, c: 3): .Orange,
+        Position(r: 2, c: 1): .Blue,
+        Position(r: 3, c: 4): .Black,
+        Position(r: 4, c: 2): .Red
+    ],
+    initial: State(squares: [
+        (Position(r: 1, c: 2), Square(color: .Orange, direction: .Down)),
+        (Position(r: 2, c: 4), Square(color: .Black, direction: .Left)),
+        (Position(r: 3, c: 1), Square(color: .Blue, direction: .Right)),
+        (Position(r: 4, c: 3), Square(color: .Red, direction: .Up))
+        ]))
+    
+
 println("Solving Game About Squares")
 
 let startTime = NSDate()
-let solution = solve(level19)
+let solution = solve(level26)
 let endTime = NSDate()
 
 println(group(solution))
