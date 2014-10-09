@@ -202,6 +202,7 @@ struct Puzzle
     let targets : [Position : Color]
     let initial : State
     let boundingBox : Rectangle
+    let extendedBoundingBox : Rectangle
     
     init (arrows : [Position : Direction], targets : [Position : Color], initial : State) {
         func extendBox(inout box : Rectangle, pos : Position)
@@ -223,11 +224,12 @@ struct Puzzle
         {
             extendBox(&box, pos)
         }
+        self.boundingBox = box
         box.0.r -= initial.count - 1
         box.0.c -= initial.count - 1
         box.1.r += initial.count - 1
         box.1.c += initial.count - 1
-        self.boundingBox = box
+        self.extendedBoundingBox = box
     }
     
     func isSolvedBy(state: State) -> Bool {
@@ -244,12 +246,39 @@ struct Puzzle
         return true
     }
     
-    func inBoundingBox(state: State) -> Bool {
+    func inExtendedBoundingBox(state: State) -> Bool {
         for s in state.squares {
-            if s.0.r < boundingBox.0.r || s.0.c < boundingBox.0.c || s.0.r > boundingBox.1.r || s.0.c > boundingBox.1.c {
+            if s.0.r < extendedBoundingBox.0.r || s.0.c < extendedBoundingBox.0.c || s.0.r > extendedBoundingBox.1.r || s.0.c > extendedBoundingBox.1.c {
                 return false
             }
         }
+        return true
+    }
+    
+    func distanceFromBoundingBox(p: Position) -> Int {
+        let d1 = boundingBox.0.r - p.r
+        let d2 = boundingBox.0.c - p.c
+        let d3 = p.r - boundingBox.1.r
+        let d4 = p.c - boundingBox.1.c
+        return max(d1, d2, d3, d4)
+    }
+    
+    func solvable(state: State) -> Bool {
+        var farsquare = state[0]
+        var far_d = distanceFromBoundingBox(farsquare.0)
+        for i in 1 ..< state.count {
+            let d = distanceFromBoundingBox(state[i].0)
+            if d > far_d {
+                far_d = d
+                farsquare = state[i]
+            }
+        }
+        let (pos, square) = farsquare
+        if pos.r < boundingBox.0.r && square.direction != .Down { return false }
+        if pos.c < boundingBox.0.c && square.direction != .Right { return false }
+        if pos.r > boundingBox.1.r && square.direction != .Up { return false }
+        if pos.c > boundingBox.1.c && square.direction != .Left { return false }
+        
         return true
     }
 }
@@ -260,6 +289,8 @@ func solve (puzzle: Puzzle) -> [Color]
     var todo: [(State, [Color])] = [(puzzle.initial, [])]
     var n = 0
     
+    let startTime = NSDate()
+    
     for (var w=0; w < todo.count; ++w)
     {
         let (state, moves) = todo[w]
@@ -268,11 +299,14 @@ func solve (puzzle: Puzzle) -> [Color]
             var newMoves = moves
             newMoves.append(state[i].1.color)
             if puzzle.isSolvedBy(newState) {
+                let endTime = NSDate()
+                let time = endTime.timeIntervalSinceDate(startTime)
+                println("Time for solve(): \(time) s")
                 return newMoves
             }
             if !visited.contains(newState) {
                 visited.insert(newState)
-                if puzzle.inBoundingBox(newState) {
+                if puzzle.solvable(newState) {
                     let newPair = (newState, newMoves)
                     todo.append(newPair) // todo.append((newState, newMoves)) // didn't work
                 }
@@ -378,6 +412,6 @@ let endTime = NSDate()
 println(group(solution))
 println("\(solution.count) moves.")
 let time = endTime.timeIntervalSinceDate(startTime)
-println("Time: \(time) s")
+println("Total Time: \(time) s")
 println("Number of hashes: \(State.nhashes)")
 
