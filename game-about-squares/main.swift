@@ -223,10 +223,10 @@ struct Puzzle
         {
             extendBox(&box, pos)
         }
-        box.0.r -= initial.count
-        box.0.c -= initial.count
-        box.1.r += initial.count
-        box.1.c += initial.count
+        box.0.r -= initial.count - 1
+        box.0.c -= initial.count - 1
+        box.1.r += initial.count - 1
+        box.1.c += initial.count - 1
         self.boundingBox = box
     }
     
