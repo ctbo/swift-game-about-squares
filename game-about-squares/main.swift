@@ -24,7 +24,7 @@ struct Set<T: Hashable>
     }
 }
 
-struct Position : Hashable, Printable
+struct Position : Hashable, CustomStringConvertible
 {
     var r, c: Int
     
@@ -53,7 +53,7 @@ func == (left: Position, right: Position) -> Bool {
 
 typealias Rectangle = (Position, Position)
 
-enum Color : Printable
+enum Color : CustomStringConvertible
 {
     case Red, Green, Blue, Black, Yellow, Orange
     var description : String {
@@ -69,7 +69,7 @@ enum Color : Printable
     }
 }
 
-enum Direction : Printable
+enum Direction : CustomStringConvertible
 {
     case Up, Down, Left, Right
     var description : String {
@@ -82,7 +82,7 @@ enum Direction : Printable
     }
 }
 
-struct Square : Hashable, Printable
+struct Square : Hashable, CustomStringConvertible
 {
     let color : Color
     var direction : Direction
@@ -107,7 +107,7 @@ func != (s1: Square, s2: Square) -> Bool {
 }
 */
 
-struct State : Hashable, Printable
+struct State : Hashable, CustomStringConvertible
 {
     var squares : [(Position, Square)]
     static var nhashes = 0
@@ -152,7 +152,7 @@ struct State : Hashable, Printable
     func click (squareno: Int, puzzle: Puzzle) -> State
     {
         var newState = self
-        push(&newState, squares[squareno].0, squares[squareno].1.direction, puzzle)
+        push(&newState, pos: squares[squareno].0, dir: squares[squareno].1.direction, puzzle: puzzle)
         return newState
     }
     
@@ -186,7 +186,7 @@ func push(inout state: State, pos: Position, dir: Direction, puzzle: Puzzle)
     for i in 0 ..< state.count {
         if state[i].0 == pos {
             let newPos = pos.move(dir)
-            push(&state, newPos, dir, puzzle)
+            push(&state, pos: newPos, dir: dir, puzzle: puzzle)
             state[i].0 = newPos
             if let newDir = puzzle.arrows[newPos] {
                 state[i].1.direction = newDir
@@ -218,11 +218,11 @@ struct Puzzle
         var box = (Position(r: Int.max, c: Int.max), Position(r: Int.min, c: Int.min))
         for pos in arrows.keys
         {
-            extendBox(&box, pos)
+            extendBox(&box, pos: pos)
         }
         for pos in targets.keys
         {
-            extendBox(&box, pos)
+            extendBox(&box, pos: pos)
         }
         self.boundingBox = box
         box.0.r -= initial.count - 1
@@ -301,7 +301,7 @@ func solve (puzzle: Puzzle) -> [Color]
             if puzzle.isSolvedBy(newState) {
                 let endTime = NSDate()
                 let time = endTime.timeIntervalSinceDate(startTime)
-                println("Time for solve(): \(time) s")
+                print("Time for solve(): \(time) s")
                 return newMoves
             }
             if !visited.contains(newState) {
@@ -312,7 +312,7 @@ func solve (puzzle: Puzzle) -> [Color]
                 }
             }
             if ++n <= 20 || n % 0x1000 == 0 {
-                println("\(newState), \(newMoves.count) moves, \(visited.count) states")
+                print("\(newState), \(newMoves.count) moves, \(visited.count) states")
             }
         }
     }
@@ -403,15 +403,15 @@ let level26 = Puzzle(
         ]))
     
 
-println("Solving Game About Squares")
+print("Solving Game About Squares")
 
 let startTime = NSDate()
 let solution = solve(level26)
 let endTime = NSDate()
 
-println(group(solution))
-println("\(solution.count) moves.")
+print(group(solution))
+print("\(solution.count) moves.")
 let time = endTime.timeIntervalSinceDate(startTime)
-println("Total Time: \(time) s")
-println("Number of hashes: \(State.nhashes)")
+print("Total Time: \(time) s")
+print("Number of hashes: \(State.nhashes)")
 
